@@ -1,14 +1,21 @@
 let scene, camera, renderer, controls, room;
 let roomWidth = 5, roomLength = 6, roomHeight = 3;
 
+// Make globals accessible to other scripts (like axis.js)
+window.scene = null;
+window.roomWidth = roomWidth;
+window.roomLength = roomLength;
+window.roomHeight = roomHeight;
+
 // Initialize the 3D scene
 function init() {
     const canvas = document.getElementById('renderCanvas');
-    
+
     // Scene setup
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a1a);
     scene.fog = new THREE.Fog(0x1a1a1a, 10, 50);
+    window.scene = scene;
 
     // Camera setup
     camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
@@ -208,6 +215,11 @@ function generateRoom() {
     roomLength = parseFloat(document.getElementById('roomLength').value);
     roomHeight = parseFloat(document.getElementById('roomHeight').value);
 
+    // Update globals for axis.js
+    window.roomWidth = roomWidth;
+    window.roomLength = roomLength;
+    window.roomHeight = roomHeight;
+
     // Remove existing room
     if (room) {
         scene.remove(room);
@@ -238,6 +250,14 @@ function generateRoom() {
             moveableBox = null;
         }
     }
+
+    // Create axis system - ensure it's called after room variables are set
+    // Add a small delay to ensure everything is properly initialized
+    setTimeout(() => {
+        if (typeof createAxisSystem === 'function') {
+            createAxisSystem();
+        }
+    }, 50);
 }
 
 function exportImage() {

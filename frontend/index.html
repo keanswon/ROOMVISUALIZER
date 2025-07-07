@@ -30,6 +30,7 @@
             <div class="button-group">
                 <button class="btn btn-primary" onclick="generateRoom()">Generate Room</button>
                 <button class="btn btn-secondary" onclick="exportImage()">Export as PNG</button>
+                <button class="btn btn-axis" id="axisToggle" onclick="toggleAxis()">Hide Axis</button>
             </div>
 
             <div class="section-title">Box Controls</div>
@@ -67,6 +68,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/axis.js"></script>
     <script src="js/3Dgeneration.js"></script>
     <script src="js/moveable-box.js"></script>
 </body>
