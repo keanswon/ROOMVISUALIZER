@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Room Generator</title>
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 30px; font-size: 2.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">3D Room Generator</h1>
+        
+        <div class="controls">
+            <div class="section-title">Room Dimensions</div>
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="roomWidth">Width (X) - meters</label>
+                    <input type="number" id="roomWidth" value="5" min="1" max="20" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label for="roomLength">Length (Y) - meters</label>
+                    <input type="number" id="roomLength" value="6" min="1" max="20" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label for="roomHeight">Height (Z) - meters</label>
+                    <input type="number" id="roomHeight" value="3" min="1" max="5" step="0.1">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="generateRoom()">Generate Room</button>
+                <button class="btn btn-secondary" onclick="exportImage()">Export as PNG</button>
+            </div>
+
+            <div class="section-title">Box Controls</div>
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="boxWidth">Box Width (X) - meters</label>
+                    <input type="number" id="boxWidth" value="1" min="0.1" max="5" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label for="boxHeight">Box Height (Y) - meters</label>
+                    <input type="number" id="boxHeight" value="1" min="0.1" max="5" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label for="boxDepth">Box Depth (Z) - meters</label>
+                    <input type="number" id="boxDepth" value="1" min="0.1" max="5" step="0.1">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="generateBox()">Add Box</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="renderCanvas"></canvas>
+            <div id="dimensionsDisplay" class="dimensions-display">
+                Room: 5.0m × 6.0m × 3.0m
+            </div>
+        </div>
+
+        <div class="info">
+            <strong>Controls:</strong> Left click + drag to rotate • Right click + drag to pan • Scroll to zoom<br>
+            <strong>Usage:</strong> Enter room dimensions in meters, click "Generate Room" to create the 3D model, then "Export as PNG" to save the image.
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/3Dgeneration.js"></script>
+    <script src="js/moveable-box.js"></script>
+</body>
+</html>
