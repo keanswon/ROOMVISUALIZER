@@ -9,6 +9,8 @@ let dragOffset = new THREE.Vector3();
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 let isBoxSelected = false;
+let snapToGrid = false;
+let snapIncrement = 1.0; // 1 meter or 1 foot
 
 // Create moveable box
 function createMoveableBox(width, height, depth) {
@@ -111,8 +113,11 @@ function onBoxMouseMove(event) {
     raycaster.ray.intersectPlane(floorPlane, intersectionPoint);
     
     if (intersectionPoint) {
-        // Apply drag offset and constraints
-        const newPosition = intersectionPoint.add(dragOffset);
+        // Apply drag offset
+        let newPosition = intersectionPoint.add(dragOffset);
+        
+        // Apply snapping if enabled
+        newPosition = snapToGridPosition(newPosition);
         
         // Constrain to room boundaries using half dimensions
         const halfBoxWidth = boxWidth / 2;
@@ -146,4 +151,26 @@ function onBoxMouseUp(event) {
 // Function to check if box interaction should block camera controls
 function isBoxInteractionActive() {
     return isDragging || isBoxSelected;
+}
+
+// Toggle snap to grid
+function toggleSnap() {
+    snapToGrid = !snapToGrid;
+    const button = document.getElementById('snapToggle');
+    if (button) {
+        button.textContent = snapToGrid ? 'Disable Snap' : 'Enable Snap';
+    }
+    
+    // Update snap increment based on current unit
+    snapIncrement = currentUnit === 'meters' ? 1.0 : 1.0; // 1 meter or 1 foot
+}
+
+// Snap position to grid
+function snapToGridPosition(position) {
+    if (!snapToGrid) return position;
+    
+    const snapped = position.clone();
+    snapped.x = Math.round(snapped.x / snapIncrement) * snapIncrement;
+    snapped.z = Math.round(snapped.z / snapIncrement) * snapIncrement;
+    return snapped;
 }

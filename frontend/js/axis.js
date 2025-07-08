@@ -70,6 +70,7 @@ function createTextSprite(text, color = 0xffffff, size = 0.2) {
 }
 
 // Create axis line with ticks and labels
+// Create axis line with ticks and labels
 function createAxis(direction, length, color, label) {
     const axisSubGroup = new THREE.Group();
     
@@ -116,52 +117,105 @@ function createAxis(direction, length, color, label) {
     
     axisSubGroup.add(arrow);
     
-    // Enhanced tick marks
+    // Create ticks and labels based on current unit
     const tickMaterial = new THREE.MeshBasicMaterial({ color: AXIS_CONFIG.colors.ticks });
-    const totalInches = length * 39.3701;
     
-    for (let inch = 0; inch <= totalInches; inch++) {
-        const position = (inch / 39.3701);
-        const isFoot = inch % 12 === 0;
-        const tickLength = isFoot ? AXIS_CONFIG.majorTickLength : AXIS_CONFIG.minorTickLength;
-        
-        // Thicker tick marks
-        const tickGeometry = new THREE.CylinderGeometry(
-            AXIS_CONFIG.tickLineWidth/2, 
-            AXIS_CONFIG.tickLineWidth/2, 
-            tickLength
-        );
-        const tick = new THREE.Mesh(tickGeometry, tickMaterial);
-        
-        // Position tick based on axis direction
-        if (direction === 'x') {
-            tick.position.set(position, 0, 0);
-            tick.rotation.z = Math.PI / 2;
-        } else if (direction === 'y') {
-            tick.position.set(0, position, 0);
-        } else if (direction === 'z') {
-            tick.position.set(0, 0, position);
-            tick.rotation.x = Math.PI / 2;
-        }
-        
-        axisSubGroup.add(tick);
-        
-        // Enhanced labels for foot marks
-        if (isFoot && inch > 0) {
-            const feet = inch / 12;
-            const labelText = `${feet}'`;
-            const labelSprite = createTextSprite(labelText, AXIS_CONFIG.colors.labels, AXIS_CONFIG.fontSize);
+    // Check current unit system
+    const isMetric = (typeof currentUnit !== 'undefined' && currentUnit === 'meters');
+    
+    if (isMetric) {
+        // Metric system - create meter ticks
+        for (let meter = 0; meter <= Math.ceil(length); meter++) {
+            if (meter > length) break;
             
-            // Position label with better offset
+            const position = meter;
+            const tickLength = AXIS_CONFIG.majorTickLength;
+            
+            // Create tick mark
+            const tickGeometry = new THREE.CylinderGeometry(
+                AXIS_CONFIG.tickLineWidth/2, 
+                AXIS_CONFIG.tickLineWidth/2, 
+                tickLength
+            );
+            const tick = new THREE.Mesh(tickGeometry, tickMaterial);
+            
+            // Position tick based on axis direction
             if (direction === 'x') {
-                labelSprite.position.set(position, -AXIS_CONFIG.labelOffset, 0);
+                tick.position.set(position, 0, 0);
+                tick.rotation.z = Math.PI / 2;
             } else if (direction === 'y') {
-                labelSprite.position.set(-AXIS_CONFIG.labelOffset, position, 0);
+                tick.position.set(0, position, 0);
             } else if (direction === 'z') {
-                labelSprite.position.set(0, -AXIS_CONFIG.labelOffset, position);
+                tick.position.set(0, 0, position);
+                tick.rotation.x = Math.PI / 2;
             }
             
-            axisSubGroup.add(labelSprite);
+            axisSubGroup.add(tick);
+            
+            // Add labels for meter marks (skip 0)
+            if (meter > 0) {
+                const labelText = `${meter}m`;
+                const labelSprite = createTextSprite(labelText, AXIS_CONFIG.colors.labels, AXIS_CONFIG.fontSize);
+                
+                // Position label with better offset
+                if (direction === 'x') {
+                    labelSprite.position.set(position, -AXIS_CONFIG.labelOffset, 0);
+                } else if (direction === 'y') {
+                    labelSprite.position.set(-AXIS_CONFIG.labelOffset, position, 0);
+                } else if (direction === 'z') {
+                    labelSprite.position.set(0, -AXIS_CONFIG.labelOffset, position);
+                }
+                
+                axisSubGroup.add(labelSprite);
+            }
+        }
+    } else {
+        // Imperial system - create inch/foot ticks
+        const totalInches = length * 39.3701;
+        
+        for (let inch = 0; inch <= totalInches; inch++) {
+            const position = (inch / 39.3701);
+            const isFoot = inch % 12 === 0;
+            const tickLength = isFoot ? AXIS_CONFIG.majorTickLength : AXIS_CONFIG.minorTickLength;
+            
+            // Create tick mark
+            const tickGeometry = new THREE.CylinderGeometry(
+                AXIS_CONFIG.tickLineWidth/2, 
+                AXIS_CONFIG.tickLineWidth/2, 
+                tickLength
+            );
+            const tick = new THREE.Mesh(tickGeometry, tickMaterial);
+            
+            // Position tick based on axis direction
+            if (direction === 'x') {
+                tick.position.set(position, 0, 0);
+                tick.rotation.z = Math.PI / 2;
+            } else if (direction === 'y') {
+                tick.position.set(0, position, 0);
+            } else if (direction === 'z') {
+                tick.position.set(0, 0, position);
+                tick.rotation.x = Math.PI / 2;
+            }
+            
+            axisSubGroup.add(tick);
+            
+            // Add labels for foot marks (skip 0)
+            if (isFoot && inch > 0) {
+                const feet = inch / 12;
+                const labelText = `${feet}'`;
+                const labelSprite = createTextSprite(labelText, AXIS_CONFIG.colors.labels, AXIS_CONFIG.fontSize);
+                
+                // Position label with better offset
+                if (direction === 'x') {
+                    labelSprite.position.set(position, -AXIS_CONFIG.labelOffset, 0);
+                } else if (direction === 'y') {
+                    labelSprite.position.set(-AXIS_CONFIG.labelOffset, position, 0);
+                } else if (direction === 'z') {
+                    labelSprite.position.set(0, -AXIS_CONFIG.labelOffset, position);
+                }
+                
+                axisSubGroup.add(labelSprite);
+            }
         }
     }
     

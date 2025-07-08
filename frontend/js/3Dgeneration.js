@@ -6,6 +6,17 @@ window.scene = null;
 window.roomWidth = roomWidth;
 window.roomLength = roomLength;
 window.roomHeight = roomHeight;
+let currentUnit = 'meters';
+window.currentUnit = currentUnit;
+
+// Conversion functions
+function metersToFeet(meters) {
+    return meters * 3.28084;
+}
+
+function feetToMeters(feet) {
+    return feet / 3.28084;
+}
 
 // Initialize the 3D scene
 function init() {
@@ -211,9 +222,15 @@ function createRoom(width, length, height) {
 
 function generateRoom() {
     // Get input values
-    roomWidth = parseFloat(document.getElementById('roomWidth').value);
-    roomLength = parseFloat(document.getElementById('roomLength').value);
-    roomHeight = parseFloat(document.getElementById('roomHeight').value);
+    roomWidth = currentUnit === 'meters' ? 
+        parseFloat(document.getElementById('roomWidth').value) : 
+        feetToMeters(parseFloat(document.getElementById('roomWidth').value));
+    roomLength = currentUnit === 'meters' ? 
+        parseFloat(document.getElementById('roomLength').value) : 
+        feetToMeters(parseFloat(document.getElementById('roomLength').value));
+    roomHeight = currentUnit === 'meters' ? 
+        parseFloat(document.getElementById('roomHeight').value) : 
+        feetToMeters(parseFloat(document.getElementById('roomHeight').value));  
 
     // Update globals for axis.js
     window.roomWidth = roomWidth;
@@ -236,8 +253,13 @@ function generateRoom() {
     camera.lookAt(0, roomHeight/2, 0);
 
     // Update dimensions display
+    const unit = currentUnit === 'meters' ? 'm' : 'ft';
+    const width = currentUnit === 'meters' ? roomWidth : metersToFeet(roomWidth);
+    const length = currentUnit === 'meters' ? roomLength : metersToFeet(roomLength);
+    const height = currentUnit === 'meters' ? roomHeight : metersToFeet(roomHeight);
+
     document.getElementById('dimensionsDisplay').textContent = 
-        `Room: ${roomWidth.toFixed(1)}m × ${roomLength.toFixed(1)}m × ${roomHeight.toFixed(1)}m`;
+        `Room: ${width.toFixed(1)}${unit} × ${length.toFixed(1)}${unit} × ${height.toFixed(1)}${unit}`;
 
     // Check if moveable box is outside new room bounds
     if (moveableBox) {
@@ -282,6 +304,69 @@ function handleResize() {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+}
+
+function toggleUnits() {
+    const button = document.getElementById('unitToggle');
+    const inputs = ['roomWidth', 'roomLength', 'roomHeight', 'boxWidth', 'boxHeight', 'boxDepth'];
+    
+    if (currentUnit === 'meters') {
+        // Switch to feet
+        currentUnit = 'feet';
+        button.textContent = 'Switch to Meters';
+        
+        // Update input labels and values
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            const label = input.previousElementSibling;
+            const currentValue = parseFloat(input.value);
+            
+            // Convert value and update
+            input.value = metersToFeet(currentValue).toFixed(1);
+            
+            // Update label
+            if (label) {
+                label.textContent = label.textContent.replace('meters', 'feet');
+            }
+        });
+        
+        // Update room dimensions display
+        document.getElementById('dimensionsDisplay').textContent = 
+            `Room: ${metersToFeet(roomWidth).toFixed(1)}ft × ${metersToFeet(roomLength).toFixed(1)}ft × ${metersToFeet(roomHeight).toFixed(1)}ft`;
+            
+    } else {
+        // Switch to meters
+        currentUnit = 'meters';
+        button.textContent = 'Switch to Feet';
+        
+        // Update input labels and values
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            const label = input.previousElementSibling;
+            const currentValue = parseFloat(input.value);
+            
+            // Convert value and update
+            input.value = feetToMeters(currentValue).toFixed(1);
+            
+            // Update label
+            if (label) {
+                label.textContent = label.textContent.replace('feet', 'meters');
+            }
+        });
+        
+        // Update room dimensions display
+        document.getElementById('dimensionsDisplay').textContent = 
+            `Room: ${roomWidth.toFixed(1)}m × ${roomLength.toFixed(1)}m × ${roomHeight.toFixed(1)}m`;
+    }
+    
+    // Update axis system
+    if (typeof updateAxisSystem === 'function') {
+        updateAxisSystem();
+    }
+
+    if (typeof toggleSnap !== 'undefined') {
+        snapIncrement = currentUnit === 'meters' ? 1.0 : 1.0; // 1 meter or 1 foot
+    }
 }
 
 // Event listeners
