@@ -1,13 +1,18 @@
 let scene, camera, renderer, controls, room;
 let roomWidth = 5, roomLength = 6, roomHeight = 3;
+let currentUnit = 'meters';
 
-// Make globals accessible to other scripts (like axis.js)
+// Make globals accessible to other scripts
 window.scene = null;
 window.roomWidth = roomWidth;
 window.roomLength = roomLength;
 window.roomHeight = roomHeight;
-let currentUnit = 'meters';
-window.currentUnit = currentUnit;
+
+// Furniture-related globals
+window.moveableFurniture = [];
+window.currentFurnitureType = 'chair';
+window.snapToGrid = false;
+window.snapIncrement = 0.5; // Default 0.5 meters
 
 // Conversion functions
 function metersToFeet(meters) {
@@ -21,7 +26,7 @@ function feetToMeters(feet) {
 // Initialize the 3D scene
 function init() {
     const canvas = document.getElementById('renderCanvas');
-
+    
     // Scene setup
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a1a);
@@ -62,7 +67,12 @@ function init() {
 
     // Generate initial room
     generateRoom();
-    setupBoxInteraction();
+    
+    // Initialize furniture interaction
+    if (typeof setupFurnitureInteraction === 'function') {
+        setupFurnitureInteraction();
+    }
+    
     animate();
 }
 
@@ -221,6 +231,7 @@ function createRoom(width, length, height) {
 }
 
 function generateRoom() {
+    console.log('Generating room...');
     // Get input values
     roomWidth = currentUnit === 'meters' ? 
         parseFloat(document.getElementById('roomWidth').value) : 
@@ -244,7 +255,9 @@ function generateRoom() {
 
     // Create new room
     room = createRoom(roomWidth, roomLength, roomHeight);
+    console.log('Room created:', room);
     scene.add(room);
+    console.log('Room added to scene');
 
     // Update camera position for better view
     const maxDimension = Math.max(roomWidth, roomLength, roomHeight);
@@ -261,20 +274,23 @@ function generateRoom() {
     document.getElementById('dimensionsDisplay').textContent = 
         `Room: ${width.toFixed(1)}${unit} × ${length.toFixed(1)}${unit} × ${height.toFixed(1)}${unit}`;
 
-    // Check if moveable box is outside new room bounds
-    if (moveableBox) {
-        const halfBoxWidth = boxWidth / 2;
-        const halfBoxDepth = boxDepth / 2;
-        const pos = moveableBox.position;
-        if (pos.x < -roomWidth/2 + halfBoxWidth || pos.x > roomWidth/2 - halfBoxWidth ||
-            pos.z < -roomLength/2 + halfBoxDepth || pos.z > roomLength/2 - halfBoxDepth) {
-            scene.remove(moveableBox);
-            moveableBox = null;
-        }
+    // Check if furniture pieces are outside new room bounds
+    if (window.moveableFurniture && window.moveableFurniture.length > 0) {
+        window.moveableFurniture.forEach((furniture, index) => {
+            const dimensions = furniture.userData.dimensions;
+            const halfWidth = dimensions.width / 2;
+            const halfDepth = dimensions.depth / 2;
+            const pos = furniture.position;
+            
+            if (pos.x < -roomWidth/2 + halfWidth || pos.x > roomWidth/2 - halfWidth ||
+                pos.z < -roomLength/2 + halfDepth || pos.z > roomLength/2 - halfDepth) {
+                scene.remove(furniture);
+                window.moveableFurniture.splice(index, 1);
+            }
+        });
     }
 
     // Create axis system - ensure it's called after room variables are set
-    // Add a small delay to ensure everything is properly initialized
     setTimeout(() => {
         if (typeof createAxisSystem === 'function') {
             createAxisSystem();
@@ -364,8 +380,9 @@ function toggleUnits() {
         updateAxisSystem();
     }
 
-    if (typeof toggleSnap !== 'undefined') {
-        snapIncrement = currentUnit === 'meters' ? 1.0 : 1.0; // 1 meter or 1 foot
+    // Update snap increment if toggleSnap is defined
+    if (typeof updateSnapIncrement === 'function') {
+        updateSnapIncrement();
     }
 }
 

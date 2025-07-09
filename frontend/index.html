@@ -52,7 +52,43 @@
 
             <div class="button-group">
                 <button class="btn btn-secondary" onclick="generateBox()">Add Box</button>
+                <button class="btn btn-secondary" onclick="clearAllBoxes()">Clear Boxes</button>
                 <button class="btn btn-secondary" id="snapToggle" onclick="toggleSnap()">Enable Snap</button>
+            </div>
+
+            <div class="section-title">Furniture Controls</div>
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="furnitureType">Furniture Type</label>
+                    <select id="furnitureType" onchange="setFurnitureType(this.value)">
+                        <option value="chair">Chair</option>
+                        <option value="table">Table</option>
+                        <option value="sofa">Sofa</option>
+                        <option value="desk">Desk</option>
+                        <option value="bookshelf">Bookshelf</option>
+                    </select>
+                </div>
+                <div class="input-field">
+                    <label for="furnitureWidth">Width - <span class="unit-label">meters</span></label>
+                    <input type="number" id="furnitureWidth" value="1" min="0.1" max="5" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label for="furnitureHeight">Height - <span class="unit-label">meters</span></label>
+                    <input type="number" id="furnitureHeight" value="1" min="0.1" max="5" step="0.1">
+                </div>
+                <div class="input-field">
+                    <label for="furnitureDepth">Depth - <span class="unit-label">meters</span></label>
+                    <input type="number" id="furnitureDepth" value="1" min="0.1" max="5" step="0.1">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="generateFurniture()">Add Furniture</button>
+                <button class="btn btn-secondary" onclick="clearAllFurniture()">Clear Furniture</button>
+                <button class="btn btn-secondary" id="snapToggle" onclick="toggleSnap()">Enable Snap</button>
+                <input type="file" id="photoInput" accept="image/*" style="display: none" onchange="handlePhotoUpload(event)">
+                <button class="btn btn-secondary" onclick="document.getElementById('photoInput').click()">Upload Texture</button>
+                <button class="btn btn-secondary" onclick="clearPhoto()">Clear Texture</button>
             </div>
         </div>
 
@@ -71,7 +107,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="js/axis.js"></script>
+    <script src="js/furniture-template.js"></script>
+    <script src="js/moveable-furniture.js"></script>
     <script src="js/3Dgeneration.js"></script>
-    <script src="js/moveable-box.js"></script>
 </body>
 </html>
